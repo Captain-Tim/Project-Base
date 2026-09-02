@@ -6,37 +6,27 @@ AI 容易因 **additive bias** 而新增 class、wrapper、flag 或 compatibilit
 
 ---
 
-## Whole Picture — BFS
+## Workflow Overview
 
 ```text
-0. Choose Workflow Depth and Control Mode
-   選擇任務深度、實際路徑與階段轉換方式
-        ↓
-1. Spec
-   定義要改變什麼，以及什麼叫完成
-        ↓
-2. Implementation
-   以可驗證的最小範圍實作需求
-        ↓
-3. Correctness Gate
-   證明必要的 build、測試與需求行為正確
-        ↓
-4. Architecture Gate
-   依任務深度檢查責任、邊界與舊結構
-        ↓
-5. Simplification
-   執行有具體理由的結構清理
-        ↓ 若有修改
-4. Architecture Gate Recheck
-   重新檢查簡化後的最終結構
-        ↓
-6. Regression Again
-   Correctness Gate 後若有修改，重跑必要驗證
-        ↓
+0. Classify task and choose control mode
+1. Define the spec
+
+repeat
+    2. Implement
+    3. Run the Correctness Gate
+until correctness passes
+
+repeat
+    4. Run the Architecture Gate
+    5. Simplify when findings exist
+until simplification makes no architecture change
+
+6. Run required regression checks
 Done
 ```
 
-Steps 1–6 是工程關注點，不代表每個任務都要舉行六個獨立儀式。Step 0 決定哪些階段要完整執行、縮減、合併或條件式執行。
+Step 0 先依任務風險決定控制模式與實際路徑；Steps 1–6 再依分類完整執行、縮減、合併或條件式跳過。
 
 ---
 
