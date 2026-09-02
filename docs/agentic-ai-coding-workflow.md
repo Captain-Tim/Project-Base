@@ -26,6 +26,9 @@ AI 容易因 **additive bias** 而新增 class、wrapper、flag 或 compatibilit
         ↓
 5. Simplification
    執行有具體理由的結構清理
+        ↓ 若有修改
+4. Architecture Gate Recheck
+   重新檢查簡化後的最終結構
         ↓
 6. Regression Again
    Correctness Gate 後若有修改，重跑必要驗證
@@ -102,6 +105,29 @@ Workflow Step 的批准只允許階段轉換，不會授權 destructive operatio
 | 4. Architecture | Final diff review | Short gate | Full gate |
 | 5. Simplification | 發現並修正問題時 | 有合理 findings 時 | 處理所有 findings，可結論為不需修改 |
 | 6. Regression | Step 3 後有修改時 | Step 3 後有修改時 | Final regression |
+
+### Model routing
+
+> **Model selection snapshot — 2026-09-02（Asia/Taipei）：** 下列型號是基於目前可用模型與能力認知的暫定選擇，不是永久規則。模型能力、工具整合、供應狀態、價格與限制變動快速，至少每月或在新模型／重大版本發布後，以代表性任務重新評估。Implementer／Reviewer 的角色分離原則可以保留，具體型號應隨評估結果更新。
+
+品質優先且可使用 Codex 與 Claude Code 時，依下表分配模型：
+
+| Step | Trivial | 普通 Bounded | 高風險 Bounded | Architectural |
+|---|---|---|---|---|
+| **Step 0 — 分類** | Sol | Sol | Sol | Sol |
+| **Step 1 — Spec** | Sol | Sol | Sol | Sol |
+| **Step 2 — Implementation** | Sol | Opus 5 | Opus 5 | Opus 5 |
+| **Step 3 — Correctness** | Sol | Sol（新對話） | Sol（新對話） | Sol（新對話） |
+| **Step 4 — Architecture** | Sol | Sol | Sol | Sol |
+| **Step 5 — Simplification** | Sol* | Opus 5* | Opus 5* | Opus 5* |
+| **Step 4 — Recheck** | Sol* | Sol* | Sol* | Sol* |
+| **Step 6 — Regression** | Sol* | Sol* | Sol* | Sol |
+
+- **`*`：** 有修改才執行。
+
+- **新對話：** Reviewer 不延續 Step 0–1 的對話，只讀 `spec.md`、repository、actual diff 與 tests，先獨立形成 correctness 與 architecture 判斷。
+- **高風險 Bounded：** 模型 routing 的子分類，不改變 workflow depth；適用於 persistence、state transition、public contract、security 或難以回歸的行為。
+- **Conditional Step：** 未觸發時仍須說明 skip reason。
 
 ### Classification
 
@@ -207,7 +233,9 @@ Correctness Gate 只回答：**目前的行為是否正確？**
 
 走過此 Step 不代表一定要修改。沒有值得處理的 findings 時，記錄不需 simplification 的理由，不得為完成形式而製造重構。
 
-**輸出：** 完成有理由的簡化，或記錄不修改的理由。
+若此 Step 修改了 architecture，返回 Step 4，由 Reviewer 以更新後的 repository 與 actual diff 重新執行 Architecture Gate。Recheck 發現新 findings 時再次返回 Step 5；只有 Architecture Gate 通過後才能進入 Step 6。沒有修改時沿用原 Step 4 結論，不另行 recheck。
+
+**輸出：** 完成有理由的簡化並通過 Step 4 recheck，或記錄不修改的理由。
 
 ---
 
