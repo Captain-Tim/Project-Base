@@ -60,25 +60,26 @@ AI 可以自行閱讀 repository、history、call path 與文件，進行範圍�
 - 必須 commit、push、merge、publish、release 或改變外部服務狀態，但尚未獲得授權。
 - 規格嚴重不足，任何方向都只能猜測。
 
-### Workflow transition control
+### Control and reporting
 
 Control mode 管理 Step 0–6 之間的轉換，不管理 Step 內的個別 shell、Git、檔案修改或測試命令。
 
 - **Continuous：** 完成一個 Step 後回報結果，但可直接進入路徑中的下一個 Step。
 - **Step-gated：** 完成一個 Step 後提交產出、證據與建議的下一步，然後停止；取得使用者批准後才能繼續。
 
-每個 Step-gated checkpoint 都要先顯示 `Completion Contract` 定義的 Cumulative Workflow Status，再使用：
+階段批准只允許 workflow 轉換，不授權破壞性操作、version-control／release action、外部 side effect 或範圍擴張。任務的預設 control mode 由 Step 0 決定；使用者或專案規則可指定更嚴格的模式。
+
+Step-gated checkpoint 使用：🟢 已核准或 passed、🟡 等待核准、🟠 未驗證或有風險、🔴 failed 或 blocked、⚪ pending 或有理由地跳過。🟠、🔴 與 ⚪ 必須附簡短理由。
 
 ```text
-Step completed:
-Outputs and evidence:
-Next step:
+Workflow progress: <all Steps; one line each>
+Current checkpoint: <Step>
+Outputs and evidence: <current Step only>
+Next step: <Step>
 Status: Waiting for approval
 ```
 
-Workflow Step 的批准只允許階段轉換，不會授權 destructive operations、version-control 或 release actions、外部 side effect 或範圍擴張。若 gate 失敗，先報告 failure evidence 與建議返回的 Step；Step-gated 模式取得批准後才能返回修正。
-
-各任務深度的預設模式由 Step 0 矩陣定義；使用者或專案規則可以指定更嚴格的模式。
+已核准階段只保留一行結果，只展開目前 Step 的證據。Gate 失敗時報告 failure evidence 與建議返回的 Step；Step-gated 模式取得批准後才能返回修正。
 
 ---
 
@@ -260,38 +261,3 @@ Done 代表適用的 acceptance criteria、build、static checks、behavior evid
 Trivial 可以只報告修改摘要、相關檢查與 final diff review。Bounded 與 Architectural 必須提供足以對應 acceptance criteria 的證據，不得以「看起來正確」、推測或修改前的綠燈宣稱完成。
 
 Step-gated 模式完成 Step 6 後先提交 completion evidence；取得使用者接受後才能標為 Done。
-
-### Status markers
-
-回報多項 checks、acceptance criteria 或 workflow progress 時使用：
-
-- 🟢 Passed，或已完成且已核准
-- 🟡 Current step completed and waiting for approval
-- 🟠 Concern、partial verification 或 unverified
-- 🔴 Failed 或 blocked
-- ⚪ Pending、conditionally skipped 或 not applicable；標明具體狀態或理由
-
-每個 🟠、🔴 或 ⚪ 項目都要附簡短說明。不要依賴可能無法一致顯示的文字顏色或 HTML styling。
-
-### Cumulative Workflow Status
-
-每個 checkpoint 先列出完整 workflow 的累積狀態，讓使用者能快速看到整體進度。已核准的舊 Step 只保留一行結果，不重複 evidence；只有目前 Step 在下方展開完整產出與證據。使用者批准後，下一次回報把該 Step 從 🟡 更新為 🟢。
-
-```text
-Workflow progress:
-- 🟢 Step 0 — <one-line approved result>
-- 🟢 Step 1 — <one-line approved result>
-- 🟡 Step 2 — <current result; waiting for approval>
-- ⚪ Step 3 — Pending
-- ⚪ Step 4 — Pending
-- ⚪ Step 5 — Conditional
-- ⚪ Step 6 — Conditional
-
-Current checkpoint: Step 2
-<current step outputs and evidence only>
-
-Next step: Step 3 — Correctness Gate
-Status: Waiting for approval
-```
-
-Gate 失敗時，將目前 Step 標為 🔴，保留已核准 Step 的 🟢 摘要，並把尚未進入的 Steps 保持為 ⚪。Conditional Step 若不需要執行，使用 ⚪ 並簡述 skip reason。
