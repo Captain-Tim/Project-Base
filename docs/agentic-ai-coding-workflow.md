@@ -9,8 +9,7 @@ AI 容易因 **additive bias** 而新增 class、wrapper、flag 或 compatibilit
 ## Workflow Overview
 
 ```text
-0. Classify task and choose control mode
-1. Define the spec
+1. Define the task, workflow, and completion criteria
 
 repeat
     2. Implement
@@ -26,13 +25,13 @@ until simplification makes no architecture change
 Done
 ```
 
-Step 0 先依任務風險決定控制模式與實際路徑；Steps 1–6 再依分類完整執行、縮減、合併或條件式跳過。
+Step 1 先釐清需求並決定控制模式與實際路徑；Steps 2–6 再依分類完整執行、縮減、合併或條件式跳過。
 
 ---
 
 ## Task Workspace
 
-每個 task 使用獨立 Git branch，並在 Step 0 前切換完成。Branch name 不含 `/`、無固定前綴；文件統一放在同名的 `branch_doc/<branch-name>/`。
+每個 task 使用獨立 Git branch，並在 Step 1 前切換完成。Branch name 不含 `/`、無固定前綴；文件統一放在同名的 `branch_doc/<branch-name>/`。
 
 ```text
 auth-refresh → branch_doc/auth-refresh/
@@ -73,116 +72,90 @@ Status: Waiting for approval
 
 ---
 
-## 0. Classify Task
+## 1. Define Task
 
-- **Trivial：** 文件、文字，或已確認不改變 runtime、build、deployment、security semantics 與 observable behavior 的小型機械修改。Dependency、CI、feature flag、build 或 deployment config 無法確認 semantics 不變時，至少分類為 Bounded。
-- **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
-- **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
-
-Trivial 任務使用 Sol 與 Continuous 模式，不建立 routing 文件。Bounded 與 Architectural 任務使用 `$workflow-routing` 建立 `model-routing.md`。
-
-Step 0 至少輸出：
-
-```text
-Task class:
-Control mode:
-Workflow path:
-Routing artifact: <path or none>
-```
-
-執行中發現隱藏複雜度時升級分類並重新 routing。Architectural 任務若方向與授權已明確，不因分類本身額外要求產品決策。
-
----
-
-## 1. Spec
-
-Spec 把需求轉成可判斷的完成條件，不預先指定不必要的實作細節。
-
-依任務深度確認：
-
-- 要改變的 observable behavior
-- 必須保留的既有行為
-- 已知 corner cases
-- 可自動驗證的結果
-- 可能改變的 responsibility、ownership 與影響範圍
-
-Architectural 任務若存在會實質改變產品行為、架構方向或範圍的未決選擇，取得使用者批准後才能進入 Implementation。
-
-**輸出：** 與任務深度相稱的 acceptance criteria、影響範圍，以及 Architectural 任務的可 review implementation plan。
+- **Purpose：** 釐清需求、決定 workflow depth，並定義完成條件。
+- **Input：** 使用者需求、相關 context。
+- **Actions：**
+  - 釐清要改變的 observable behavior、已知邊界與必須保留的行為。
+  - 確認影響範圍，並將需求整理成 acceptance criteria。
+  - 依影響分類：
+    - **Trivial：** 文件、文字，或已確認不改變 runtime、build、deployment、security semantics 與 observable behavior 的小型機械修改。Dependency、CI、feature flag、build 或 deployment config 無法確認 semantics 不變時，至少分類為 Bounded。
+    - **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
+    - **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
+  - Trivial 使用 Sol 與 Continuous 模式；Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
+- **Output：** Trivial 確認 scope；Bounded 與 Architectural 建立 `spec.md` 與 `model-routing.md`。
+- **Exit criteria：** Scope、acceptance criteria、task class 與 routing 均已明確，且會實質改變產品行為或範圍的未決選擇已取得使用者批准。
+- **Next：** 進入 Step 2；後續發現隱藏複雜度時返回 Step 1，更新 Spec、分類與 routing。
 
 ---
 
 ## 2. Implementation
 
-先閱讀相關 call path、tests 與既有 abstraction，再以可控制、可驗證的最小修改完成需求。
-
-- 說明修改哪些 responsibility，而不只列檔名。
-- 優先修改現有模型；新增 abstraction 前說明必要性。
-- 依測試策略處理新行為與已知 corner cases。
-- 不做與需求無關的大型重構。
-- 留意 boolean flag、forwarding wrapper、重複 validation、舊 class 與 compatibility branch 等 additive bias 產物。
-
-**輸出：** 能進入 Correctness Gate 的 working implementation 與 focused evidence。
+- **Purpose：** 以可控制、可驗證的最小修改完成 Spec。
+- **Input：** Step 1 產出、相關 call path、tests 與既有 abstraction。
+- **Actions：**
+  - Architectural 任務先決定 responsibility、ownership、affected components 與 change sequence；需要使用者決定的架構方向須在修改前取得批准。
+  - 優先修改現有模型；新增 abstraction 前說明必要性。
+  - 處理 acceptance criteria 與已知邊界，不做無關重構，並留意 wrapper、flag、重複 validation 等 additive bias。
+- **Output：** Working implementation、actual diff 與 focused evidence。
+- **Exit criteria：** 實作涵蓋指定 scope，且已準備好接受獨立驗證。
+- **Next：** 進入 Step 3；Correctness Gate 失敗時返回 Step 2。
 
 ---
 
 ## 3. Correctness Gate
 
-Correctness Gate 只回答：**目前的行為是否正確？**
-
-依專案與任務風險執行必要的 build、compile、unit、regression、integration、acceptance、lint、type check 或其他 static checks。綠燈只有在證據能對應需求核心時才算通過。
-
-### Proportional testing
-
-- 可重現 bug、deterministic domain logic、parsing、persistence、state transition、public contract 與可精確描述的 corner case，優先 test-first：先確認測試因正確原因失敗，再做最小修正、驗證並重構。
-- Legacy code、UI orchestration、外部 integration boundary，或必須先探索才能確定穩定介面的工作，可以同時或事後補測試，但完成前仍需核心行為證據。
-- 純文件、已確認 semantics 不變的機械設定，以及由 compiler、formatter、linter 或 schema tooling 完整保證的規則，不要求人造測試。
-- 不得只為形式而測試 mock、實作細節或沒有回歸價值的內容。
-
-人工發現的 bug 與 corner case 應盡量轉成永久 regression test。
-
-**Gate：** 所有必要驗證通過，而且證據能對應 acceptance criteria。
+- **Purpose：** 回答「目前的行為是否正確？」
+- **Input：** Step 1 產出、repository、actual diff 與相關 tests。
+- **Actions：** 依專案與風險執行必要的 build、compile、unit、regression、integration、acceptance、lint、type check 或其他 static checks：
+  - 可重現 bug、deterministic domain logic、parsing、persistence、state transition、public contract 與可精確描述的 corner case，優先 test-first：先確認測試因正確原因失敗，再做最小修正、驗證並重構。
+  - Legacy code、UI orchestration、外部 integration boundary，或必須先探索才能確定穩定介面的工作，可以同時或事後補測試，但完成前仍需核心行為證據。
+  - 純文件、已確認 semantics 不變的機械設定，以及由 compiler、formatter、linter 或 schema tooling 完整保證的規則，不要求人造測試。
+  - 不得只為形式而測試 mock、實作細節或沒有回歸價值的內容。
+  - 人工發現的 bug 與 corner case 應盡量轉成永久 regression test。
+- **Output：** Verification commands、結果與能對應 acceptance criteria 的證據。
+- **Exit criteria：** 所有必要驗證通過，而且證據能對應 acceptance criteria。
+- **Next：** 通過後進入 Step 4；失敗時返回 Step 2。
 
 ---
 
 ## 4. Architecture Gate
 
-在 correctness 已成立後重新問：
-
-> **If the new requirement had existed from the beginning, would we still have designed the system this way?**
-
-依任務深度檢查：
-
-- 受影響的 class / module 是否仍有單一、清楚的責任？
-- ownership 搬走後，舊 abstraction 是否只剩轉接或歷史包袱？
-- 新舊路徑是否表達同一個 concept？
-- 是否出現兩套 state、validation 或 configuration source？
-- wrapper、adapter、flag 或 compatibility layer 是否代表長期需要的差異？
-- 哪些結構現在可以刪除、合併、改名或搬移？
-
-這一步與 Implementation 分開進行；必要時使用獨立 review context 或 subagent。
-
-**Gate：** 說明應保留與應簡化的結構，以及具體理由。
+- **Purpose：** 在 correctness 成立後回答：「If the new requirement had existed from the beginning, would we still have designed the system this way?」
+- **Input：** Step 1 產出、通過的 Step 3 證據、repository 與 actual diff。
+- **Actions：** 依任務深度、並與 Implementation 分開檢查；必要時使用獨立 review context 或 subagent：
+  - 受影響的 class / module 是否仍有單一、清楚的責任？
+  - ownership 搬走後，舊 abstraction 是否只剩轉接或歷史包袱？
+  - 新舊路徑是否表達同一個 concept？
+  - 是否出現兩套 state、validation 或 configuration source？
+  - wrapper、adapter、flag 或 compatibility layer 是否代表長期需要的差異？
+  - 哪些結構現在可以刪除、合併、改名或搬移？
+- **Output：** 應保留與應簡化的結構及具體理由。
+- **Exit criteria：** 受影響的 responsibility、ownership 與結構均已評估，findings 明確或確認沒有 findings。
+- **Next：** 有 findings 時進入 Step 5；否則說明跳過理由並進入 Step 6。
 
 ---
 
 ## 5. Simplification
 
-執行 Architecture Gate 中有具體理由的清理，例如刪除失去責任的路徑、合併重複 abstraction、搬移 ownership、取代 compatibility wrapper，或更新反映目前 mental model 的名稱與文件。
-
-簡化的判準是用較少概念理解系統，而不是追求較少行數。刪除前確認 dependency；保留舊結構也要指出具體 dependency。
-
-沒有值得處理的 findings 時，記錄理由後進入 Step 6。若修改了 architecture，返回 Step 4 recheck；出現新 findings 時再回 Step 5，直到 Step 4 通過。
-
-**輸出：** 完成有理由的簡化並通過 Step 4 recheck，或記錄不修改的理由。
+- **Purpose：** 處理 Step 4 findings，以較少概念表達最終 architecture。
+- **Input：** Step 4 findings、Step 1 產出、repository 與 actual diff。
+- **Actions：** 刪除失去責任的路徑、合併重複 abstraction、搬移 ownership、取代 compatibility wrapper，或更新名稱與文件。簡化追求較少概念而非較少行數；刪除或保留舊結構都須確認具體 dependency。
+- **Output：** Simplification changes，或保留 finding 的具體理由。
+- **Exit criteria：** 所有 findings 已處理，或有具體 dependency 支持保留現狀。
+- **Next：** 修改 architecture 時返回 Step 4 recheck；未修改時進入 Step 6。
 
 ---
 
 ## 6. Final Regression
 
-Step 3 後若修改 code、configuration 或其他受驗證內容，重跑 Step 3 中受影響的檢查，不得沿用修改前的綠燈。Architectural 必須執行 final regression；Trivial 與 Bounded 沒有 post-gate change 時可以跳過並說明理由。
-
-另確認移除的路徑沒有 dead reference 或漏接 caller，且 final diff 與 Spec 一致、沒有無關變更。必要檢查無法執行時，揭露原因、替代證據與剩餘風險。
+- **Purpose：** 確認 Step 3 的 correctness 在後續修改後仍成立，且 final diff 可交付。
+- **Input：** Step 3 結果、Step 4–5 結果、final diff 與 Step 1 產出。
+- **Actions：** Step 3 後若修改受驗證內容，重跑受影響的 Step 3 checks；另確認沒有 dead reference、漏接 caller 或與 Spec 無關的變更。Architectural 必須執行 final regression；Trivial 與 Bounded 沒有 post-gate change 時可以跳過。
+- **Output：** Final verification 結果；跳過或無法執行的檢查須附理由、替代證據與剩餘風險。
+- **Exit criteria：** 所有必要檢查通過，且 final diff 與 Step 1 產出一致。
+- **Next：** 提交 Completion Contract 所需的 completion evidence。
 
 ---
 

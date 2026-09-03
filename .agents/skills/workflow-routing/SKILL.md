@@ -5,7 +5,7 @@ description: Plan workflow depth and cross-runtime model routing for a Bounded o
 
 # Workflow Routing
 
-Use this skill once during Step 0, after the task has been classified as Bounded or Architectural. Select both the executor and model; Codex and Claude Code are separate runtimes, so routing may require a user handoff.
+Use this skill once during Step 1, after the requirements are clear and the task has been classified as Bounded or Architectural. Select both the executor and model; Codex and Claude Code are separate runtimes, so routing may require a user handoff.
 
 ## Preconditions
 
@@ -18,9 +18,9 @@ Use this skill once during Step 0, after the task has been classified as Bounded
 
 | Stage | Bounded | Architectural |
 |---|---|---|
-| Control | Step 0 chooses; default Step-gated | Step-gated |
-| 1. Spec | Lightweight acceptance criteria | Full spec, design, and plan |
-| 2. Implementation | Scoped | Staged |
+| Control | Step 1 chooses; default Step-gated | Step-gated |
+| 1. Define Task | Lightweight spec and acceptance criteria | Full requirements and acceptance criteria |
+| 2. Implementation | Scoped | Design and staged implementation |
 | 3. Correctness | Focused tests + risk-based regression | Comprehensive verification |
 | 4. Architecture | Short gate | Full gate |
 | 5. Simplification | When justified findings exist | Resolve all findings; no change is a valid conclusion |
@@ -36,8 +36,7 @@ Use the following quality-first routing when both Codex and Claude Code are avai
 
 | Step | Ordinary Bounded | High-risk Bounded | Architectural |
 |---|---|---|---|
-| **0. Classification** | Sol | Sol | Sol |
-| **1. Spec** | Sol | Sol | Sol |
+| **1. Define Task** | Sol | Sol | Sol |
 | **2. Implementation** | Opus5 | Opus5 | Opus5 |
 | **3. Correctness** | Sol (fresh) | Sol (fresh) | Sol (fresh) |
 | **4. Architecture** | Sol | Sol | Sol |
