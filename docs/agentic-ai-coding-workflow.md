@@ -172,9 +172,7 @@ Correctness Gate 只回答：**目前的行為是否正確？**
 
 簡化的判準是用較少概念理解系統，而不是追求較少行數。刪除前確認 dependency；保留舊結構也要指出具體 dependency。
 
-走過此 Step 不代表一定要修改。沒有值得處理的 findings 時，記錄不需 simplification 的理由，不得為完成形式而製造重構。
-
-若此 Step 修改了 architecture，返回 Step 4，由 Reviewer 以更新後的 repository 與 actual diff 重新執行 Architecture Gate。Recheck 發現新 findings 時再次返回 Step 5；只有 Architecture Gate 通過後才能進入 Step 6。沒有修改時沿用原 Step 4 結論，不另行 recheck。
+沒有值得處理的 findings 時，記錄理由後進入 Step 6。若修改了 architecture，返回 Step 4 recheck；出現新 findings 時再回 Step 5，直到 Step 4 通過。
 
 **輸出：** 完成有理由的簡化並通過 Step 4 recheck，或記錄不修改的理由。
 
