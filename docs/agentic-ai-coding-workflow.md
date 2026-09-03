@@ -180,18 +180,11 @@ Correctness Gate 只回答：**目前的行為是否正確？**
 
 ---
 
-## 6. Regression Again
+## 6. Final Regression
 
-Correctness Gate 後若修改 code、configuration 或其他受驗證內容，重跑依影響範圍與風險判定為必要的驗證，不得沿用修改前的綠燈。Trivial 與 Bounded 沒有 post-gate change 時可以跳過；Architectural 依 Step 0 執行 final regression。
+Step 3 後若修改 code、configuration 或其他受驗證內容，重跑 Step 3 中受影響的檢查，不得沿用修改前的綠燈。Architectural 必須執行 final regression；Trivial 與 Bounded 沒有 post-gate change 時可以跳過並說明理由。
 
-依任務需要確認：
-
-- 必要 build / compile 與影響範圍內測試通過
-- 新需求、integration 與 acceptance evidence 通過
-- 移除的路徑沒有 dead reference 或漏接 caller
-- final diff 與 Spec 一致且沒有無關變更
-
-完整 suite 無法執行時，揭露原因、替代證據與剩餘風險。
+另確認移除的路徑沒有 dead reference 或漏接 caller，且 final diff 與 Spec 一致、沒有無關變更。必要檢查無法執行時，揭露原因、替代證據與剩餘風險。
 
 ---
 
