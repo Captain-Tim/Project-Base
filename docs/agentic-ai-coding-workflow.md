@@ -98,6 +98,7 @@ Status: Waiting for approval
   - 閱讀相關 call path、tests 與既有 abstraction。
   - Architectural 任務先決定 responsibility、ownership、affected components 與 change sequence；需要使用者決定的架構方向須在修改前取得批准。
   - 處理 acceptance criteria 與已知邊界，不做無關重構，並留意 wrapper、flag、重複 validation 等 additive bias。
+  - 可穩定重現或精確描述的行為優先 test-first；人工發現的 bug 與 boundary case 應加入 regression test。
   - `verification.md` 在此 Step 為唯讀，不得建立或修改。
 - **Output：** Working-tree changes，以及依 acceptance criteria 整理的 implementation summary；actual diff 由 repository 取得。
 - **Exit criteria：** 實作涵蓋指定 scope，且已準備好接受獨立驗證。
@@ -107,16 +108,14 @@ Status: Waiting for approval
 
 ## 3. Correctness Gate
 
-- **Purpose：** 回答「目前的行為是否正確？」
+- **Purpose：** 獨立確認 Spec 與 implementation 是否一致。
 - **Input：** Step 1 產出、repository、actual diff 與相關 tests。
-- **Actions：** 依專案與風險執行必要的 build、compile、unit、regression、integration、acceptance、lint、type check 或其他 static checks：
-  - 可重現 bug、deterministic domain logic、parsing、persistence、state transition、public contract 與可精確描述的 corner case，優先 test-first：先確認測試因正確原因失敗，再做最小修正、驗證並重構。
-  - Legacy code、UI orchestration、外部 integration boundary，或必須先探索才能確定穩定介面的工作，可以同時或事後補測試，但完成前仍需核心行為證據。
-  - 純文件、已確認 semantics 不變的機械設定，以及由 compiler、formatter、linter 或 schema tooling 完整保證的規則，不要求人造測試。
-  - 不得只為形式而測試 mock、實作細節或沒有回歸價值的內容。
-  - 人工發現的 bug 與 corner case 應盡量轉成永久 regression test。
-- **Output：** 由 Step 3 executor 建立或更新的 `verification.md`，記錄 verification commands、結果與能對應 acceptance criteria 的證據；其他 Steps 不得寫入。
-- **Exit criteria：** 所有必要驗證通過，而且證據能對應 acceptance criteria。
+- **Actions：**
+  - 逐項比對 acceptance criteria、observable behavior、implementation 與 evidence。
+  - 發現不一致或證據不足時，記錄未驗證項目或 finding。
+  - Repository code 與 tests 在此 Step 為唯讀；需要修改時記錄 finding 並返回 Step 2。
+- **Output：** 由 Step 3 executor 建立或更新的 `verification.md`，逐項記錄 alignment 結論、evidence 與 findings。
+- **Exit criteria：** 每項 acceptance criterion 都有充分 evidence。
 - **Next：** 通過後進入 Step 4；失敗時返回 Step 2。
 
 ---

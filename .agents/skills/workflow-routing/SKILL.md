@@ -21,7 +21,7 @@ Use this skill once during Step 1, after the requirements are clear and the task
 | Control | Step 1 chooses; default Step-gated | Step-gated |
 | 1. Define Task | Lightweight spec and acceptance criteria | Full requirements and acceptance criteria |
 | 2. Implementation | Scoped | Design and staged implementation |
-| 3. Correctness | Focused tests + risk-based regression | Comprehensive verification |
+| 3. Correctness | Focused alignment review | Comprehensive alignment review |
 | 4. Architecture | Short gate | Full gate |
 | 5. Simplification | When justified findings exist | Resolve all findings; no change is a valid conclusion |
 | 6. Final Regression | If Step 3 is followed by changes | Final regression |
