@@ -22,16 +22,17 @@ repeat
 until simplification makes no architecture change
 
 6. Run required regression checks
+7. Summarize the workflow and obtain acceptance
 Done
 ```
 
-Step 1 先釐清需求並決定控制模式與實際路徑；Steps 2–6 再依分類完整執行、縮減、合併或條件式跳過。
+Step 1 先釐清需求並決定控制模式與實際路徑。Steps 2–7 再依分類完整執行、縮減、合併或條件式跳過。
 
 ---
 
 ## Task Workspace
 
-每個 task 使用獨立 Git branch，並在 Step 1 前切換完成。Branch name 不含 `/`、無固定前綴；文件統一放在同名的 `branch_doc/<branch-name>/`。
+每個 task 使用獨立 Git branch，並在 Step 1 前切換完成。Branch name 不含 `/`、無固定前綴。文件統一放在同名的 `branch_doc/<branch-name>/`。
 
 ```text
 auth-refresh → branch_doc/auth-refresh/
@@ -41,9 +42,9 @@ auth-refresh → branch_doc/auth-refresh/
 
 ## Execution Boundaries
 
-- 依指令優先順序執行，不降低安全與權限邊界；影響行為、驗證或交付的重要偏離必須揭露。
+- 依指令優先順序執行，不降低安全與權限邊界。影響行為、驗證或交付的重要偏離必須揭露。
 - 修改前檢查 working tree。除非確認由本任務建立，既有 modified、staged 與 untracked files 一律視為他人內容，不得改寫、移除或 stage。
-- 寫入工具只能作用於任務範圍。與既有變更衝突時停止；無關故障只回報，不擴大任務。
+- 寫入工具只能作用於任務範圍。與既有變更衝突時停止。無關故障只回報，不擴大任務。
 
 ### When to stop
 
@@ -56,19 +57,21 @@ auth-refresh → branch_doc/auth-refresh/
 ### Control and reporting
 
 - **Continuous：** 回報 Step 結果後直接繼續。
-- **Step-gated：** 完成一個 Step 後提交產出、證據與建議的下一步，然後停止；取得使用者批准後才能繼續。
+- **Step-gated：** 完成一個 Step 後提交產出、證據與建議的下一步，然後停止。取得使用者批准後才能繼續。
 
 
 Checkpoint 狀態：🟢 passed／已核准、🟡 等待核准、🟠 有風險或未驗證、🔴 failed／blocked、⚪ pending／有理由地跳過。🟠、🔴、⚪ 必須說明理由。
 
 ```text
-Workflow progress: <all Steps; one line each>
+Workflow progress: <all Steps, one line each>
 Current: <Step and evidence>
 Next: <Step>
 Status: Waiting for approval
 ```
 
-已核准 Step 只保留一行；Gate 失敗時回報證據與建議返回的 Step，核准後才修正。
+已核准 Step 只保留一行。Gate 失敗時回報證據與建議返回的 Step，核准後才修正。
+
+Bounded 與 Architectural 使用兩份跨 Step 文件：目前 executor 在每個 checkpoint 更新 `status.md` 的 Step 狀態、摘要與 artifact。收到使用者意見時立即按 Step 追加至 `user-feedback.md`。該文件不得寫入 executor 自己的 findings，也不得改寫既有內容。
 
 ---
 
@@ -83,10 +86,10 @@ Status: Waiting for approval
     - **Trivial：** 文件、文字，或已確認不改變 runtime、build、deployment、security semantics 與 observable behavior 的小型機械修改。Dependency、CI、feature flag、build 或 deployment config 無法確認 semantics 不變時，至少分類為 Bounded。
     - **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
     - **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
-  - Trivial 使用 Sol 與 Continuous 模式；Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
-- **Output：** Trivial 確認 scope；Bounded 與 Architectural 建立 `spec.md` 與 `model-routing.md`。
+  - Trivial 使用 Sol 與 Continuous 模式。Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
+- **Output：** Trivial 確認 scope。Bounded 與 Architectural 建立 `spec.md`、`model-routing.md`、`status.md` 與 `user-feedback.md`。
 - **Exit criteria：** Scope、acceptance criteria、task class 與 routing 均已明確，且會實質改變產品行為或範圍的未決選擇已取得使用者批准。
-- **Next：** 進入 Step 2；後續發現隱藏複雜度時返回 Step 1，更新 Spec、分類與 routing。
+- **Next：** 進入 Step 2。後續發現隱藏複雜度時返回 Step 1，更新 Spec、分類與 routing。
 
 ---
 
@@ -96,13 +99,13 @@ Status: Waiting for approval
 - **Input：** Step 1 產出、repository，以及 Step 3 退回時既有的 `verification.md`。
 - **Actions：**
   - 閱讀相關 call path、tests 與既有 abstraction。
-  - Architectural 任務先決定 responsibility、ownership、affected components 與 change sequence；需要使用者決定的架構方向須在修改前取得批准。
+  - Architectural 任務先決定 responsibility、ownership、affected components 與 change sequence。需要使用者決定的架構方向須在修改前取得批准。
   - 處理 acceptance criteria 與已知邊界，不做無關重構，並留意 wrapper、flag、重複 validation 等 additive bias。
-  - 可穩定重現或精確描述的行為優先 test-first；人工發現的 bug 與 boundary case 應加入 regression test。
+  - 可穩定重現或精確描述的行為優先 test-first。人工發現的 bug 與 boundary case 應加入 regression test。
   - `verification.md` 在此 Step 為唯讀，不得建立或修改。
-- **Output：** Working-tree changes，以及依 acceptance criteria 整理的 implementation summary；actual diff 由 repository 取得。
+- **Output：** Working-tree changes，以及依 acceptance criteria 整理的 implementation summary。Actual diff 由 repository 取得。
 - **Exit criteria：** 實作涵蓋指定 scope，且已準備好接受獨立驗證。
-- **Next：** 進入 Step 3；Correctness Gate 失敗時返回 Step 2。
+- **Next：** 進入 Step 3。Correctness Gate 失敗時返回 Step 2。
 
 ---
 
@@ -113,10 +116,10 @@ Status: Waiting for approval
 - **Actions：**
   - 逐項比對 acceptance criteria、observable behavior、implementation 與 evidence。
   - 發現不一致或證據不足時，記錄未驗證項目或 finding。
-  - Repository code 與 tests 在此 Step 為唯讀；需要修改時記錄 finding 並返回 Step 2。
+  - Repository code 與 tests 在此 Step 為唯讀。需要修改時記錄 finding 並返回 Step 2。
 - **Output：** 由 Step 3 executor 建立或更新的 `verification.md`，逐項記錄 alignment 結論、evidence 與 findings。
 - **Exit criteria：** 每項 acceptance criterion 都有充分 evidence。
-- **Next：** 通過後進入 Step 4；失敗時返回 Step 2。
+- **Next：** 通過後進入 Step 4。失敗時返回 Step 2。
 
 ---
 
@@ -131,10 +134,10 @@ Status: Waiting for approval
   - 是否出現兩套 state、validation 或 configuration source？
   - wrapper、adapter、flag 或 compatibility layer 是否代表長期需要的差異？
   - 哪些結構現在可以刪除、合併、改名或搬移？
-  - Repository code 與 tests 在此 Step 為唯讀；需要修改時記錄 finding 並交由 Step 5 處理。
+  - Repository code 與 tests 在此 Step 為唯讀。需要修改時記錄 finding 並交由 Step 5 處理。
 - **Output：** 由 Step 4 executor 建立或更新的 `architecture-review.md`，記錄應保留與應簡化的結構及具體理由。
 - **Exit criteria：** 受影響的 responsibility、ownership 與結構均已評估，findings 明確或確認沒有 findings。
-- **Next：** 有 findings 時進入 Step 5；否則說明跳過理由並進入 Step 6。
+- **Next：** 有 findings 時進入 Step 5，否則說明跳過理由並進入 Step 6。
 
 ---
 
@@ -142,28 +145,29 @@ Status: Waiting for approval
 
 - **Purpose：** 處理 Step 4 findings，以較少概念表達最終 architecture。
 - **Input：** `architecture-review.md`、`spec.md`、repository 與 actual diff。
-- **Actions：** 逐項處理 findings，在維持 Spec 的前提下移除不必要結構。簡化追求較少概念而非較少行數；刪除或保留結構前確認具體 dependency。`architecture-review.md` 在此 Step 為唯讀。
+- **Actions：** 逐項處理 findings，在維持 Spec 的前提下移除不必要結構。簡化追求較少概念而非較少行數。刪除或保留結構前確認具體 dependency。`architecture-review.md` 在此 Step 為唯讀。
 - **Output：** Working-tree changes，以及每項 finding 的處理結果或不修改理由。
 - **Exit criteria：** 所有 findings 已處理，或有具體理由支持不修改。
-- **Next：** 有修改時返回 Step 4 recheck；沒有修改且理由成立時進入 Step 6。
+- **Next：** 有修改時返回 Step 4 recheck。沒有修改且理由成立時進入 Step 6。
 
 ---
 
 ## 6. Final Regression
 
 - **Purpose：** 確認 Step 3 的 correctness 在後續修改後仍成立，且 final diff 可交付。
-- **Input：** Step 3 結果、Step 4–5 結果、final diff 與 Step 1 產出。
-- **Actions：** Step 3 後若修改受驗證內容，重跑受影響的 Step 3 checks；另確認沒有 dead reference、漏接 caller 或與 Spec 無關的變更。Architectural 必須執行 final regression；Trivial 與 Bounded 沒有 post-gate change 時可以跳過。
-- **Output：** Final verification 結果；跳過或無法執行的檢查須附理由、替代證據與剩餘風險。
-- **Exit criteria：** 所有必要檢查通過，且 final diff 與 Step 1 產出一致。
-- **Next：** 提交 Completion Contract 所需的 completion evidence。
+- **Input：** `spec.md`、`verification.md`、`architecture-review.md`、repository 與 final diff。
+- **Actions：** Step 3 後若修改受驗證內容，重新確認受影響的 acceptance criteria。另確認沒有 dead reference、漏接 caller 或與 Spec 無關的變更。Architectural 必須執行 final regression。Trivial 與 Bounded 沒有 post-gate change 時可以跳過。
+- **Output：** 執行時由 Step 6 executor 建立或更新 `regression.md`。跳過或無法驗證的項目須附理由、替代證據與剩餘風險。
+- **Exit criteria：** 受影響的 acceptance criteria 仍有充分 evidence，且 final diff 與 Spec 一致、沒有無關變更。
+- **Next：** 進入 Step 7。
 
 ---
 
-## Completion Contract
+## 7. Completion Report
 
-Done 代表 acceptance criteria 與所有適用的 Steps 已通過，且未驗證項目與風險已揭露。
-
-完成報告包含修改的 responsibility／behavior、驗證結果、architecture／simplification 結論與剩餘風險。Trivial 可以簡短報告；Bounded 與 Architectural 的證據必須能對應 acceptance criteria。
-
-Step-gated 模式完成 Step 6 後先提交 completion evidence；取得使用者接受後才能標為 Done。
+- **Purpose：** 彙整 workflow 結果與 feedback，完成任務文件。
+- **Input：** 各適用 Step 產生的文件、`status.md`、`user-feedback.md` 與 final diff。
+- **Actions：** 建立或更新 `final-report.md`，以 high-level 摘要逐 Step 記錄結果、evidence、跳過理由、剩餘風險與使用者 feedback。原始 feedback 保留在 `user-feedback.md`。Trivial 可以簡短報告。
+- **Output：** `final-report.md` 與提供給使用者的 completion summary。
+- **Exit criteria：** `final-report.md` 已完成，且內容與 Input evidence 一致。
+- **Next：** Done。

@@ -25,6 +25,7 @@ Use this skill once during Step 1, after the requirements are clear and the task
 | 4. Architecture | Short gate | Full gate |
 | 5. Simplification | When justified findings exist | Resolve all findings; no change is a valid conclusion |
 | 6. Final Regression | If Step 3 is followed by changes | Final regression |
+| 7. Completion Report | Concise summary | Full workflow summary |
 
 ## Executor and model routing
 
@@ -43,6 +44,7 @@ Use the following quality-first routing when both Codex and Claude Code are avai
 | **5. Simplification** | Opus5* | Opus5* | Opus5* |
 | **4. Recheck** | Sol* | Sol* | Sol* |
 | **6. Final Regression** | Sol* | Sol* | Sol |
+| **7. Completion Report** | Sol | Sol | Sol |
 
 - `*`: Run only when the workflow condition triggers it.
 - `fresh`: Start a reviewer context that reads only `spec.md`, the repository, actual diff, and tests before independently judging correctness and architecture.
