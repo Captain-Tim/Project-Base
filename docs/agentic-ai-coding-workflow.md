@@ -30,7 +30,7 @@ until simplification makes no architecture change
 Done
 ```
 
-Step 1 先釐清需求並決定控制模式與實際路徑。Steps 2–6 再依分類完整執行、縮減、合併或條件式跳過。Step 7 統一彙整結果。
+Step 1 先釐清需求並決定 workflow depth 與實際路徑。Steps 2–6 再依分類完整執行、縮減、合併或條件式跳過。Step 7 統一彙整結果。
 
 ---
 
@@ -60,8 +60,7 @@ auth-refresh → branch_doc/auth-refresh/
 
 ### Control and reporting
 
-- **Continuous：** 回報 Step 結果後直接繼續。
-- **Step-gated：** 完成一個 Step 後提交產出、證據與建議的下一步，然後停止。取得使用者批准後才能繼續。
+- 所有任務使用 **Step-gated**：完成一個適用 Step 後提交產出、證據與建議的下一步，然後停止。取得使用者批准後才能繼續。
 
 
 Checkpoint 狀態：🟢 passed／已核准、🟡 等待核准、🟠 有風險或未驗證、🔴 failed／blocked、⚪ pending／有理由地跳過。🟠、🔴、⚪ 必須說明理由。
@@ -90,7 +89,7 @@ Bounded 與 Architectural 使用兩份跨 Step 文件：目前 executor 在每�
     - **Trivial：** 文件、文字，或已確認不改變 runtime、build、deployment、security semantics 與 observable behavior 的小型機械修改。Dependency、CI、feature flag、build 或 deployment config 無法確認 semantics 不變時，至少分類為 Bounded。
     - **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
     - **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
-  - Trivial 使用 Sol 與 Continuous 模式，只跑 Step 1 確認範圍、Step 2 修改與自我驗證、Step 7 簡短回報，跳過 Step 3–6 的獨立驗證。Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
+  - Trivial 使用 Sol，只跑 Step 1 確認範圍、Step 2 修改與自我驗證、Step 7 簡短回報，跳過 Step 3–6 的獨立驗證。Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
 - **Output：** Trivial 確認 scope。Bounded 與 Architectural 建立 `spec.md`、`model-routing.md`、`status.md` 與 `user-feedback.md`。
 - **Exit criteria：** Scope、acceptance criteria、task class 與 routing 均已明確，且會實質改變產品行為或範圍的未決選擇已取得使用者批准。
 - **Next：** 進入 Step 2。後續發現隱藏複雜度時返回 Step 1，更新 Spec、分類與 routing。

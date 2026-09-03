@@ -1,6 +1,6 @@
 ---
 name: workflow-routing
-description: Plan workflow depth and cross-runtime model routing for a Bounded or Architectural coding task, then write branch_doc/<branch-name>/model-routing.md. Do not use for Trivial tasks or to execute later workflow steps.
+description: Plan workflow depth and cross-runtime model routing for a Bounded or Architectural coding task, then write model-routing.md under the current branch's branch_doc directory. Do not use for Trivial tasks or to execute later workflow steps.
 ---
 
 # Workflow Routing
@@ -18,7 +18,7 @@ Use this skill once during Step 1, after the requirements are clear and the task
 
 | Stage | Bounded | Architectural |
 |---|---|---|
-| Control | Step 1 chooses; default Step-gated | Step-gated |
+| Control | Step-gated | Step-gated |
 | 1. Define Task | Lightweight spec and acceptance criteria | Full requirements and acceptance criteria |
 | 2. Implementation | Scoped | Design and staged implementation |
 | 3. Correctness | Focused alignment review | Comprehensive alignment review |
@@ -60,7 +60,7 @@ Create `branch_doc/<branch-name>/model-routing.md` with:
 Branch: <branch-name>
 Task class: <Bounded or Architectural>
 Routing tier: <Ordinary, High-risk, or Architectural>
-Control mode: <Continuous or Step-gated>
+Control mode: Step-gated
 Workflow path: <ordered Steps and conditional loops>
 
 | Step | Executor | Model | Context | Condition |
