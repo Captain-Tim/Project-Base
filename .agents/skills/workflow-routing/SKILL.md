@@ -24,7 +24,7 @@ Use this skill once during Step 0, after the task has been classified as Bounded
 | 3. Correctness | Focused tests + risk-based regression | Comprehensive verification |
 | 4. Architecture | Short gate | Full gate |
 | 5. Simplification | When justified findings exist | Resolve all findings; no change is a valid conclusion |
-| 6. Regression | If Step 3 is followed by changes | Final regression |
+| 6. Final Regression | If Step 3 is followed by changes | Final regression |
 
 ## Executor and model routing
 
@@ -43,7 +43,7 @@ Use the following quality-first routing when both Codex and Claude Code are avai
 | **4. Architecture** | Sol | Sol | Sol |
 | **5. Simplification** | Opus5* | Opus5* | Opus5* |
 | **4. Recheck** | Sol* | Sol* | Sol* |
-| **6. Regression** | Sol* | Sol* | Sol |
+| **6. Final Regression** | Sol* | Sol* | Sol |
 
 - `*`: Run only when the workflow condition triggers it.
 - `fresh`: Start a reviewer context that reads only `spec.md`, the repository, actual diff, and tests before independently judging correctness and architecture.
