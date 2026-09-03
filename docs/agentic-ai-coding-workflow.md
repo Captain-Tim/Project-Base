@@ -30,56 +30,46 @@ Step 0 先依任務風險決定控制模式與實際路徑；Steps 1–6 再依�
 
 ---
 
+## Task Workspace
+
+每個 task 使用獨立 Git branch，並在 Step 0 前切換完成。Branch name 不含 `/`、無固定前綴；文件統一放在同名的 `branch_doc/<branch-name>/`。
+
+```text
+auth-refresh → branch_doc/auth-refresh/
+```
+
+---
+
 ## Execution Boundaries
 
-這些規則不是可省略的 Step，而是從 repository inspection 開始就適用。
+- 依指令優先順序執行，不降低安全與權限邊界；影響行為、驗證或交付的重要偏離必須揭露。
+- 修改前檢查 working tree。除非確認由本任務建立，既有 modified、staged 與 untracked files 一律視為他人內容，不得改寫、移除或 stage。
+- 寫入工具只能作用於任務範圍。與既有變更衝突時停止；無關故障只回報，不擴大任務。
 
-### Instruction precedence
+### When to stop
 
-遵循執行環境定義的指令優先順序與適用範圍。本文件提供通用預設；有效的使用者指示或更具體的專案規則若與其不同，依執行環境判定的較高優先級指示執行。任何指示都不得降低安全與權限邊界。影響行為、驗證或交付方式的重要偏離應在結果中揭露。
+任何 Step 遇到下列情況都停止並詢問：
 
-### Preserve existing working-tree changes
-
-開始修改前檢查 working tree。除非有明確證據顯示變更由目前任務建立，否則 modified、staged 與 untracked files 一律視為使用者或其他工作的內容。
-
-- 不得 revert、overwrite、delete、move、stage 或整理無關的既有變更。
-- 修改已有變更的檔案時，保留現有內容，只做本次需求所需的最小修改。
-- 若必要修改與既有變更直接衝突且無法安全合併，停止並說明風險。
-- 限制 formatter 與其他寫入工具的作用範圍；無法限制時不得讓它改寫任務外檔案。
-- 無關故障或技術債只記錄與回報，不自行擴大任務。
-
-### Proceed or stop
-
-AI 可以自行閱讀 repository、history、call path 與文件，進行範圍內、可逆且沒有未授權外部 side effect 的修改，並執行必要驗證。Spec 足夠明確時，不要為局部實作判斷或每個小動作反覆詢問。
-
-遇到下列情況才停止並詢問：
-
-- 歧義會實質改變產品行為或架構方向。
-- 必須擴大到任務外的 subsystem。
-- 必須執行不可逆、破壞性、安全敏感或有外部 side effect 的操作。
-- 必須 commit、push、merge、publish、release 或改變外部服務狀態，但尚未獲得授權。
-- 規格嚴重不足，任何方向都只能猜測。
+- 規格不足，或歧義會改變產品行為或架構。
+- 必須擴大任務範圍。
+- 必須進行尚未授權的破壞性、安全敏感、version-control／release 或外部 side effect 操作。
 
 ### Control and reporting
 
-Control mode 管理 Step 0–6 之間的轉換，不管理 Step 內的個別 shell、Git、檔案修改或測試命令。
-
-- **Continuous：** 完成一個 Step 後回報結果，但可直接進入路徑中的下一個 Step。
+- **Continuous：** 回報 Step 結果後直接繼續。
 - **Step-gated：** 完成一個 Step 後提交產出、證據與建議的下一步，然後停止；取得使用者批准後才能繼續。
 
-階段批准只允許 workflow 轉換，不授權破壞性操作、version-control／release action、外部 side effect 或範圍擴張。任務的預設 control mode 由 Step 0 決定；使用者或專案規則可指定更嚴格的模式。
 
-Step-gated checkpoint 使用：🟢 已核准或 passed、🟡 等待核准、🟠 未驗證或有風險、🔴 failed 或 blocked、⚪ pending 或有理由地跳過。🟠、🔴 與 ⚪ 必須附簡短理由。
+Checkpoint 狀態：🟢 passed／已核准、🟡 等待核准、🟠 有風險或未驗證、🔴 failed／blocked、⚪ pending／有理由地跳過。🟠、🔴、⚪ 必須說明理由。
 
 ```text
 Workflow progress: <all Steps; one line each>
-Current checkpoint: <Step>
-Outputs and evidence: <current Step only>
-Next step: <Step>
+Current: <Step and evidence>
+Next: <Step>
 Status: Waiting for approval
 ```
 
-已核准階段只保留一行結果，只展開目前 Step 的證據。Gate 失敗時報告 failure evidence 與建議返回的 Step；Step-gated 模式取得批准後才能返回修正。
+已核准 Step 只保留一行；Gate 失敗時回報證據與建議返回的 Step，核准後才修正。
 
 ---
 
