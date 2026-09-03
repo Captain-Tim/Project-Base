@@ -22,7 +22,7 @@ repeat
 until simplification makes no architecture change
 
 6. Run required regression checks
-7. Summarize the workflow and obtain acceptance
+7. Summarize the workflow
 Done
 ```
 
@@ -86,7 +86,7 @@ Bounded 與 Architectural 使用兩份跨 Step 文件：目前 executor 在每�
     - **Trivial：** 文件、文字，或已確認不改變 runtime、build、deployment、security semantics 與 observable behavior 的小型機械修改。Dependency、CI、feature flag、build 或 deployment config 無法確認 semantics 不變時，至少分類為 Bounded。
     - **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
     - **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
-  - Trivial 使用 Sol 與 Continuous 模式。Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
+  - Trivial 使用 Sol 與 Continuous 模式，只跑 Step 1 確認範圍、Step 2 修改與自我驗證、Step 7 簡短回報，跳過 Step 3–6 的獨立驗證。Bounded 與 Architectural 使用 `$workflow-routing` 決定 workflow path 與 model routing。
 - **Output：** Trivial 確認 scope。Bounded 與 Architectural 建立 `spec.md`、`model-routing.md`、`status.md` 與 `user-feedback.md`。
 - **Exit criteria：** Scope、acceptance criteria、task class 與 routing 均已明確，且會實質改變產品行為或範圍的未決選擇已取得使用者批准。
 - **Next：** 進入 Step 2。後續發現隱藏複雜度時返回 Step 1，更新 Spec、分類與 routing。
@@ -102,10 +102,11 @@ Bounded 與 Architectural 使用兩份跨 Step 文件：目前 executor 在每�
   - Architectural 任務先決定 responsibility、ownership、affected components 與 change sequence。需要使用者決定的架構方向須在修改前取得批准。
   - 處理 acceptance criteria 與已知邊界，不做無關重構，並留意 wrapper、flag、重複 validation 等 additive bias。
   - 可穩定重現或精確描述的行為優先 test-first。人工發現的 bug 與 boundary case 應加入 regression test。
+  - Trivial 由 implementer 在此 Step 逐項確認 acceptance criteria、檢查 actual diff，並執行適用的輕量檢查；無法驗證時在 completion summary 說明理由與剩餘風險。
   - `verification.md` 在此 Step 為唯讀，不得建立或修改。
 - **Output：** Working-tree changes，以及依 acceptance criteria 整理的 implementation summary。Actual diff 由 repository 取得。
 - **Exit criteria：** 實作涵蓋指定 scope，且已準備好接受獨立驗證。
-- **Next：** 進入 Step 3。Correctness Gate 失敗時返回 Step 2。
+- **Next：** Trivial 進入 Step 7。Bounded 與 Architectural 進入 Step 3；Correctness Gate 失敗時返回 Step 2。
 
 ---
 
@@ -167,7 +168,7 @@ Bounded 與 Architectural 使用兩份跨 Step 文件：目前 executor 在每�
 
 - **Purpose：** 彙整 workflow 結果與 feedback，完成任務文件。
 - **Input：** 各適用 Step 產生的文件、`status.md`、`user-feedback.md` 與 final diff。
-- **Actions：** 建立或更新 `final-report.md`，以 high-level 摘要逐 Step 記錄結果、evidence、跳過理由、剩餘風險與使用者 feedback。原始 feedback 保留在 `user-feedback.md`。Trivial 可以簡短報告。
-- **Output：** `final-report.md` 與提供給使用者的 completion summary。
-- **Exit criteria：** `final-report.md` 已完成，且內容與 Input evidence 一致。
+- **Actions：** 建立或更新 `final-report.md`，以 high-level 摘要逐 Step 記錄結果、evidence、跳過理由、剩餘風險與使用者 feedback。原始 feedback 保留在 `user-feedback.md`。Trivial 不建 `final-report.md`，直接向使用者簡短回報。
+- **Output：** Bounded 與 Architectural 產出 `final-report.md` 與 completion summary。Trivial 只提供 completion summary。
+- **Exit criteria：** 報告內容與 Input evidence 一致，且 Bounded 與 Architectural 的 `final-report.md` 已完成。
 - **Next：** Done。
