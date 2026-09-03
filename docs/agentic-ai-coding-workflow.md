@@ -79,7 +79,7 @@ Status: Waiting for approval
 - **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
 - **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
 
-Trivial 任務使用 Sol 與 Continuous 模式，不建立 routing 文件。Bounded 與 Architectural 任務必須使用 `$workflow-routing`，並在 `branch_doc/<branch-name>/model-routing.md` 記錄 workflow path、control mode、executor、model、context 與 conditional Steps。
+Trivial 任務使用 Sol 與 Continuous 模式，不建立 routing 文件。Bounded 與 Architectural 任務使用 `$workflow-routing` 建立 `model-routing.md`。
 
 Step 0 至少輸出：
 
@@ -90,7 +90,7 @@ Workflow path:
 Routing artifact: <path or none>
 ```
 
-執行中發現隱藏複雜度時升級分類並重新 routing。未觸發的 conditional Step 必須說明跳過理由。Architectural 任務若方向與授權已明確，不因分類本身額外要求產品決策。
+執行中發現隱藏複雜度時升級分類並重新 routing。Architectural 任務若方向與授權已明確，不因分類本身額外要求產品決策。
 
 ---
 
