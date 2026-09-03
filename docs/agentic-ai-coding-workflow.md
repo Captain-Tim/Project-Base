@@ -122,16 +122,17 @@ Status: Waiting for approval
 
 ## 4. Architecture Gate
 
-- **Purpose：** 在 correctness 成立後回答：「If the new requirement had existed from the beginning, would we still have designed the system this way?」
-- **Input：** Step 1 產出、通過的 Step 3 證據、repository 與 actual diff。
-- **Actions：** 依任務深度、並與 Implementation 分開檢查；必要時使用獨立 review context 或 subagent：
+- **Purpose：** 在 correctness 成立後回答：「如果這項新需求從一開始就存在，我們仍會把系統設計成現在這樣嗎？」
+- **Input：** `spec.md`、`verification.md`、repository 與 actual diff。
+- **Actions：** 依任務深度、並與 Implementation 分開檢查：
   - 受影響的 class / module 是否仍有單一、清楚的責任？
   - ownership 搬走後，舊 abstraction 是否只剩轉接或歷史包袱？
   - 新舊路徑是否表達同一個 concept？
   - 是否出現兩套 state、validation 或 configuration source？
   - wrapper、adapter、flag 或 compatibility layer 是否代表長期需要的差異？
   - 哪些結構現在可以刪除、合併、改名或搬移？
-- **Output：** 應保留與應簡化的結構及具體理由。
+  - Repository code 與 tests 在此 Step 為唯讀；需要修改時記錄 finding 並交由 Step 5 處理。
+- **Output：** 由 Step 4 executor 建立或更新的 `architecture-review.md`，記錄應保留與應簡化的結構及具體理由。
 - **Exit criteria：** 受影響的 responsibility、ownership 與結構均已評估，findings 明確或確認沒有 findings。
 - **Next：** 有 findings 時進入 Step 5；否則說明跳過理由並進入 Step 6。
 
@@ -140,7 +141,7 @@ Status: Waiting for approval
 ## 5. Simplification
 
 - **Purpose：** 處理 Step 4 findings，以較少概念表達最終 architecture。
-- **Input：** Step 4 findings、Step 1 產出、repository 與 actual diff。
+- **Input：** `architecture-review.md`、Step 1 產出、repository 與 actual diff。
 - **Actions：** 刪除失去責任的路徑、合併重複 abstraction、搬移 ownership、取代 compatibility wrapper，或更新名稱與文件。簡化追求較少概念而非較少行數；刪除或保留舊結構都須確認具體 dependency。
 - **Output：** Simplification changes，或保留 finding 的具體理由。
 - **Exit criteria：** 所有 findings 已處理，或有具體 dependency 支持保留現狀。
