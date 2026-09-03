@@ -22,11 +22,15 @@ repeat
 until simplification makes no architecture change
 
 6. Run required regression checks
+    correctness or implementation finding → return to Step 2
+    architecture finding → return to Step 4
+    passed → continue
+
 7. Summarize the workflow
 Done
 ```
 
-Step 1 先釐清需求並決定控制模式與實際路徑。Steps 2–7 再依分類完整執行、縮減、合併或條件式跳過。
+Step 1 先釐清需求並決定控制模式與實際路徑。Steps 2–6 再依分類完整執行、縮減、合併或條件式跳過。Step 7 統一彙整結果。
 
 ---
 
@@ -160,7 +164,7 @@ Bounded 與 Architectural 使用兩份跨 Step 文件：目前 executor 在每�
 - **Actions：** Step 3 後若修改受驗證內容，重新確認受影響的 acceptance criteria。另確認沒有 dead reference、漏接 caller 或與 Spec 無關的變更。Architectural 必須執行 final regression。Trivial 與 Bounded 沒有 post-gate change 時可以跳過。
 - **Output：** 執行時由 Step 6 executor 建立或更新 `regression.md`。跳過或無法驗證的項目須附理由、替代證據與剩餘風險。
 - **Exit criteria：** 受影響的 acceptance criteria 仍有充分 evidence，且 final diff 與 Spec 一致、沒有無關變更。
-- **Next：** 進入 Step 7。
+- **Next：** 通過後進入 Step 7。Correctness 或 implementation finding 返回 Step 2；architecture finding 返回 Step 4。修正完成後重新執行下游適用 gates，並再次通過 Step 6。規格不足或必須擴大 scope 時依 When to stop 處理。
 
 ---
 
