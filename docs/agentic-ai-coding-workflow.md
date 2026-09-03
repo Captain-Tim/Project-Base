@@ -188,17 +188,8 @@ Step 3 後若修改 code、configuration 或其他受驗證內容，重跑 Step 
 
 ## Completion Contract
 
-Done 代表適用的 acceptance criteria、build、static checks、behavior evidence、Architecture Gate 與 post-gate regression 都已通過，且未驗證項目與風險已揭露。
+Done 代表 acceptance criteria 與所有適用的 Steps 已通過，且未驗證項目與風險已揭露。
 
-依任務規模報告：
-
-- acceptance criteria 狀態
-- 實際修改的責任、檔案與行為
-- verification commands 與 pass / fail 結果
-- Architecture Gate findings
-- simplification，或不需簡化的理由
-- 未驗證項目、剩餘風險與人工 checks
-
-Trivial 可以只報告修改摘要、相關檢查與 final diff review。Bounded 與 Architectural 必須提供足以對應 acceptance criteria 的證據，不得以「看起來正確」、推測或修改前的綠燈宣稱完成。
+完成報告包含修改的 responsibility／behavior、驗證結果、architecture／simplification 結論與剩餘風險。Trivial 可以簡短報告；Bounded 與 Architectural 的證據必須能對應 acceptance criteria。
 
 Step-gated 模式完成 Step 6 後先提交 completion evidence；取得使用者接受後才能標為 Done。
