@@ -92,13 +92,14 @@ Status: Waiting for approval
 
 ## 2. Implementation
 
-- **Purpose：** 以可控制、可驗證的最小修改完成 Spec。
-- **Input：** Step 1 產出、相關 call path、tests 與既有 abstraction。
+- **Purpose：** 以範圍受控、可驗證的修改完成 Spec。
+- **Input：** Step 1 產出、repository，以及 Step 3 退回時既有的 `verification.md`。
 - **Actions：**
+  - 閱讀相關 call path、tests 與既有 abstraction。
   - Architectural 任務先決定 responsibility、ownership、affected components 與 change sequence；需要使用者決定的架構方向須在修改前取得批准。
-  - 優先修改現有模型；新增 abstraction 前說明必要性。
   - 處理 acceptance criteria 與已知邊界，不做無關重構，並留意 wrapper、flag、重複 validation 等 additive bias。
-- **Output：** Working implementation、actual diff 與 focused evidence。
+  - `verification.md` 在此 Step 為唯讀，不得建立或修改。
+- **Output：** Working-tree changes，以及依 acceptance criteria 整理的 implementation summary；actual diff 由 repository 取得。
 - **Exit criteria：** 實作涵蓋指定 scope，且已準備好接受獨立驗證。
 - **Next：** 進入 Step 3；Correctness Gate 失敗時返回 Step 2。
 
@@ -114,7 +115,7 @@ Status: Waiting for approval
   - 純文件、已確認 semantics 不變的機械設定，以及由 compiler、formatter、linter 或 schema tooling 完整保證的規則，不要求人造測試。
   - 不得只為形式而測試 mock、實作細節或沒有回歸價值的內容。
   - 人工發現的 bug 與 corner case 應盡量轉成永久 regression test。
-- **Output：** Verification commands、結果與能對應 acceptance criteria 的證據。
+- **Output：** 由 Step 3 executor 建立或更新的 `verification.md`，記錄 verification commands、結果與能對應 acceptance criteria 的證據；其他 Steps 不得寫入。
 - **Exit criteria：** 所有必要驗證通過，而且證據能對應 acceptance criteria。
 - **Next：** 通過後進入 Step 4；失敗時返回 Step 2。
 
