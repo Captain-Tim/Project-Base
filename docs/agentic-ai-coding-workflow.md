@@ -73,64 +73,24 @@ Status: Waiting for approval
 
 ---
 
-## 0. Choose Workflow Depth and Control Mode
-
-先分類任務，再依下表排出實際路徑：
-
-| Stage | Trivial | Bounded | Architectural |
-|---|---|---|---|
-| Control | Continuous | Step 0 後選擇；預設 Step-gated | Step-gated |
-| 1. Spec | 隱含確認範圍 | Lightweight acceptance criteria | Full spec、design 與 plan |
-| 2. Implementation | Minimal | Scoped | Staged |
-| 3. Correctness | Relevant deterministic checks | Focused tests + risk-based regression | Comprehensive verification |
-| 4. Architecture | Final diff review | Short gate | Full gate |
-| 5. Simplification | 發現並修正問題時 | 有合理 findings 時 | 處理所有 findings，可結論為不需修改 |
-| 6. Regression | Step 3 後有修改時 | Step 3 後有修改時 | Final regression |
-
-### Model routing
-
-> **Model selection snapshot — 2026-09-02（Asia/Taipei）：** 下列型號是基於目前可用模型與能力認知的暫定選擇，不是永久規則。模型能力、工具整合、供應狀態、價格與限制變動快速，至少每月或在新模型／重大版本發布後，以代表性任務重新評估。Implementer／Reviewer 的角色分離原則可以保留，具體型號應隨評估結果更新。
-
-品質優先且可使用 Codex 與 Claude Code 時，依下表分配模型：
-
-| Step | Trivial | 普通 Bounded | 高風險 Bounded | Architectural |
-|---|---|---|---|---|
-| **Step 0 — 分類** | Sol | Sol | Sol | Sol |
-| **Step 1 — Spec** | Sol | Sol | Sol | Sol |
-| **Step 2 — Implementation** | Sol | Opus 5 | Opus 5 | Opus 5 |
-| **Step 3 — Correctness** | Sol | Sol（新對話） | Sol（新對話） | Sol（新對話） |
-| **Step 4 — Architecture** | Sol | Sol | Sol | Sol |
-| **Step 5 — Simplification** | Sol* | Opus 5* | Opus 5* | Opus 5* |
-| **Step 4 — Recheck** | Sol* | Sol* | Sol* | Sol* |
-| **Step 6 — Regression** | Sol* | Sol* | Sol* | Sol |
-
-- **`*`：** 有修改才執行。
-
-- **新對話：** Reviewer 不延續 Step 0–1 的對話，只讀 `spec.md`、repository、actual diff 與 tests，先獨立形成 correctness 與 architecture 判斷。
-- **高風險 Bounded：** 模型 routing 的子分類，不改變 workflow depth；適用於 persistence、state transition、public contract、security 或難以回歸的行為。
-- **Conditional Step：** 未觸發時仍須說明 skip reason。
-
-### Classification
+## 0. Classify Task
 
 - **Trivial：** 文件、文字，或已確認不改變 runtime、build、deployment、security semantics 與 observable behavior 的小型機械修改。Dependency、CI、feature flag、build 或 deployment config 無法確認 semantics 不變時，至少分類為 Bounded。
 - **Bounded：** 局部 bug fix、單一功能、小型 refactor，或影響清楚且不改變主要架構邊界的工作。
 - **Architectural：** 新 subsystem、跨模組行為、資料格式、公開介面、responsibility、ownership，或可能影響多個下游 consumer 的修改。
 
+Trivial 任務使用 Sol 與 Continuous 模式，不建立 routing 文件。Bounded 與 Architectural 任務必須使用 `$workflow-routing`，並在 `branch_doc/<branch-name>/model-routing.md` 記錄 workflow path、control mode、executor、model、context 與 conditional Steps。
+
 Step 0 至少輸出：
 
 ```text
 Task class:
-Workflow path:
 Control mode:
-Known requirements and open questions:
-Affected responsibilities:
-Verification strategy:
-Conditional steps:
+Workflow path:
+Routing artifact: <path or none>
 ```
 
-Blocking behavior 依矩陣的 Control row 執行。Architectural checkpoint 是 workflow transition control；方向與授權已明確時，不因分類本身額外要求產品決策。
-
-執行中發現隱藏複雜度時可以升級分類，不得為避開必要設計而維持錯誤分類。未觸發的 conditional Step 必須說明跳過理由，不得假裝執行。
+執行中發現隱藏複雜度時升級分類並重新 routing。未觸發的 conditional Step 必須說明跳過理由。Architectural 任務若方向與授權已明確，不因分類本身額外要求產品決策。
 
 ---
 
