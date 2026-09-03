@@ -141,11 +141,11 @@ Status: Waiting for approval
 ## 5. Simplification
 
 - **Purpose：** 處理 Step 4 findings，以較少概念表達最終 architecture。
-- **Input：** `architecture-review.md`、Step 1 產出、repository 與 actual diff。
-- **Actions：** 刪除失去責任的路徑、合併重複 abstraction、搬移 ownership、取代 compatibility wrapper，或更新名稱與文件。簡化追求較少概念而非較少行數；刪除或保留舊結構都須確認具體 dependency。
-- **Output：** Simplification changes，或保留 finding 的具體理由。
-- **Exit criteria：** 所有 findings 已處理，或有具體 dependency 支持保留現狀。
-- **Next：** 修改 architecture 時返回 Step 4 recheck；未修改時進入 Step 6。
+- **Input：** `architecture-review.md`、`spec.md`、repository 與 actual diff。
+- **Actions：** 逐項處理 findings，在維持 Spec 的前提下移除不必要結構。簡化追求較少概念而非較少行數；刪除或保留結構前確認具體 dependency。`architecture-review.md` 在此 Step 為唯讀。
+- **Output：** Working-tree changes，以及每項 finding 的處理結果或不修改理由。
+- **Exit criteria：** 所有 findings 已處理，或有具體理由支持不修改。
+- **Next：** 有修改時返回 Step 4 recheck；沒有修改且理由成立時進入 Step 6。
 
 ---
 
